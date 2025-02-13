@@ -9,15 +9,15 @@ import (
 )
 
 func main() {
-	fmt.Println("Social Backend Starting")
+	fmt.Printf("Social Backend Starting\n")
 
 	config.LoadVariables()
 
-	fmt.Println("Environment Variables Loaded with Success")
+	fmt.Printf("Environment Variables Loaded with Success\n")
 
 	r := router.Generate()
 
-	fmt.Printf("DB Connected to Port : %d", config.PortDB)
+	fmt.Printf("DB Connected to Port : %d \n", config.PortDB)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.PortDB), r))
 

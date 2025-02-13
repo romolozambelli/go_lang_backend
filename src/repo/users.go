@@ -3,6 +3,7 @@ package repo
 import (
 	"backend/src/router/models"
 	"database/sql"
+	"fmt"
 )
 
 // Struct of the USER Repo
@@ -18,12 +19,13 @@ func NewRepoUsers(db *sql.DB) *Users {
 // Create a new user based on the user model
 func (repoUser Users) CreateNewUser(user models.User) (uint64, error) {
 	statement, erro := repoUser.db.Prepare(
-		"INSERT INTO USERS (name,nickname,email,password) values (?,?,?,?)",
+		"INSERT INTO users (name,nickname,email,password) values (?,?,?,?)",
 	)
 
 	if erro != nil {
 		return 0, erro
 	}
+
 	defer statement.Close()
 
 	result, erro := statement.Exec(user.Name, user.Nickname, user.Email, user.Password)
@@ -31,8 +33,12 @@ func (repoUser Users) CreateNewUser(user models.User) (uint64, error) {
 		return 0, nil
 	}
 
-	lastInsertedId, erro := result.LastInsertId()
+	lastInsertedID, erro := result.LastInsertId()
 	if erro != nil {
 		return 0, nil
 	}
+
+	fmt.Printf("User inserted with success on repo = %d/n", lastInsertedID)
+
+	return uint64(lastInsertedID), nil
 }
