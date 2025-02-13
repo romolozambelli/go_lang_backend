@@ -1,17 +1,24 @@
 package main
 
 import (
-	"api/src/router"
+	"backend/src/config"
+	"backend/src/router"
 	"fmt"
 	"log"
 	"net/http"
 )
 
 func main() {
-	fmt.Println("API BAckend Started")
+	fmt.Println("Social Backend Starting")
+
+	config.LoadVariables()
+
+	fmt.Println("Environment Variables Loaded with Success")
 
 	r := router.Generate()
 
-	log.Fatal(http.ListenAndServe(":5000", r))
+	fmt.Printf("DB Connected to Port : %d", config.PortDB)
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.PortDB), r))
 
 }
