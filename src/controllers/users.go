@@ -3,13 +3,14 @@ package controllers
 import (
 	"backend/src/answer"
 	"backend/src/database"
+	"backend/src/models"
 	"backend/src/repo"
-	"backend/src/router/models"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // Insert user on DB
@@ -25,6 +26,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
 	if erro = json.Unmarshal(bodyRequest, &user); erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	if erro = user.Prepare(); erro != nil {
 		answer.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
@@ -50,7 +56,24 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // Get all users from db
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Getting all Users !"))
+
+	nameOrNick := strings.ToLower(r.URL.Query().Get("users"))
+
+	db, erro := database.Connect()
+
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoUsers(db)
+	users, erro := repo.GetUserOrNick(nameOrNick)
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+
+	}
+	answer.JSON(w, http.StatusOK, users)
 }
 
 // Get a user for a given id on db

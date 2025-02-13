@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"backend/src/router/models"
+	"backend/src/models"
 	"database/sql"
 	"fmt"
 )
@@ -41,4 +41,37 @@ func (repoUser Users) CreateNewUser(user models.User) (uint64, error) {
 	fmt.Printf("User inserted with success on repo = %d/n", lastInsertedID)
 
 	return uint64(lastInsertedID), nil
+}
+
+func (repoUser Users) GetUserOrNick(nameOrNick string) ([]models.User, error) {
+	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick) //%nameOrNick%
+
+	lines, erro := repoUser.db.Query(
+		"SELECT id, name, nickname, email, created FROM users WHERE name LIKE ? OR nickname LIKE ?",
+		nameOrNick, nameOrNick)
+
+	if erro != nil {
+		return nil, erro
+	}
+	defer lines.Close()
+
+	var users []models.User
+
+	for lines.Next() {
+		var user models.User
+
+		if erro = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nickname,
+			&user.Email,
+			&user.CreateDate,
+		); erro != nil {
+			return nil, erro
+		}
+
+		users = append(users, user)
+
+	}
+	return users, nil
 }

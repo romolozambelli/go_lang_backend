@@ -1,7 +1,7 @@
 package router
 
 import (
-	"backend/src/router/path"
+	"backend/src/path"
 
 	"github.com/gorilla/mux"
 )

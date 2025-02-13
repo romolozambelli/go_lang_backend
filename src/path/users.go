@@ -1,7 +1,7 @@
 package path
 
 import (
-	"backend/src/router/controllers"
+	"backend/src/controllers"
 	"net/http"
 )
 
