@@ -75,3 +75,33 @@ func (repoUser Users) GetUserOrNick(nameOrNick string) ([]models.User, error) {
 	}
 	return users, nil
 }
+
+// Get a user based on a given id from the datbase
+func (repoUser Users) SearchUserByID(ID uint64) (models.User, error) {
+
+	lines, erro := repoUser.db.Query(
+		"SELECT id, name, nickname, email, created FROM users WHERE id = ?",
+		ID)
+
+	if erro != nil {
+		return models.User{}, erro
+	}
+	defer lines.Close()
+
+	var user models.User
+
+	if lines.Next() {
+		if erro = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nickname,
+			&user.Email,
+			&user.CreateDate,
+		); erro != nil {
+			return models.User{}, erro
+		}
+	}
+
+	return user, nil
+
+}
