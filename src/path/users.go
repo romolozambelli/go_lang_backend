@@ -23,7 +23,7 @@ var pathUsers = []Path{
 	{
 		URI:      "/users/{userID}",
 		Method:   http.MethodGet,
-		Function: controllers.GetUser,
+		Function: controllers.GetUserById,
 		Auth:     false,
 	},
 

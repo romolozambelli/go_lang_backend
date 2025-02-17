@@ -75,3 +75,52 @@ func (repoUser Users) GetUserOrNick(nameOrNick string) ([]models.User, error) {
 	}
 	return users, nil
 }
+
+// Get a user based on a given id from the datbase
+func (repoUser Users) SearchUserByID(ID uint64) (models.User, error) {
+
+	lines, erro := repoUser.db.Query(
+		"SELECT id, name, nickname, email, created FROM users WHERE id = ?",
+		ID)
+
+	if erro != nil {
+		return models.User{}, erro
+	}
+	defer lines.Close()
+
+	var user models.User
+
+	if lines.Next() {
+		if erro = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nickname,
+			&user.Email,
+			&user.CreateDate,
+		); erro != nil {
+			return models.User{}, erro
+		}
+	}
+
+	return user, nil
+
+}
+
+// Update the user data with a given ID
+func (repoUser Users) UpdateUser(ID uint64, user models.User) error {
+
+	statement, erro := repoUser.db.Prepare(
+		"UPDATE users SET name = ?, nickname = ?, email=? WHERE id = ?",
+	)
+
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(user.Name, user.Nickname, user.Email, ID); erro != nil {
+		return erro
+	}
+
+	return nil
+}

@@ -16,15 +16,15 @@ type User struct {
 }
 
 // Prepare the user with the validations and cleanning
-func (user *User) Prepare() error {
-	if erro := user.validateUser(); erro != nil {
+func (user *User) Prepare(step string) error {
+	if erro := user.validateUser(step); erro != nil {
 		return erro
 	}
 	user.format()
 	return nil
 }
 
-func (user *User) validateUser() error {
+func (user *User) validateUser(step string) error {
 
 	if user.Name == "" {
 		return errors.New("name is mandatory to create a user")
@@ -41,7 +41,7 @@ func (user *User) validateUser() error {
 
 	}
 
-	if user.Password == "" {
+	if step == "register" && user.Password == "" {
 		return errors.New("password is mandatory to create a user")
 
 	}
