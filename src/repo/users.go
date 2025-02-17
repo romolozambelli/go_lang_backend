@@ -105,3 +105,22 @@ func (repoUser Users) SearchUserByID(ID uint64) (models.User, error) {
 	return user, nil
 
 }
+
+// Update the user data with a given ID
+func (repoUser Users) UpdateUser(ID uint64, user models.User) error {
+
+	statement, erro := repoUser.db.Prepare(
+		"UPDATE users SET name = ?, nickname = ?, email=? WHERE id = ?",
+	)
+
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(user.Name, user.Nickname, user.Email, ID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
