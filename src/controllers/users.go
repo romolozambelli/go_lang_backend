@@ -55,6 +55,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("controllers/users --> User -> %d Created with success \n", user.ID)
 	answer.JSON(w, http.StatusCreated, user)
 }
 
@@ -162,11 +163,38 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("controllers/users --> User updated ID -> %d with success\n", userID)
 	answer.JSON(w, http.StatusNoContent, nil)
 
 }
 
 // Delete user from an id
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Delete User by ID!"))
+	fmt.Printf("controllers/users --> Deleting an existent user\n")
+
+	param := mux.Vars(r)
+
+	userID, erro := strconv.ParseUint(param["userID"], 10, 64)
+	if erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoUsers(db)
+	if erro := repo.DeleteUserByID(userID); erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	fmt.Printf("controllers/users --> Deleted user ID -> %d with success\n", userID)
+	answer.JSON(w, http.StatusNoContent, nil)
+
 }

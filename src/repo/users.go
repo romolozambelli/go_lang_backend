@@ -124,3 +124,44 @@ func (repoUser Users) UpdateUser(ID uint64, user models.User) error {
 
 	return nil
 }
+
+// Delete a user data with a given ID
+func (repoUser Users) DeleteUserByID(ID uint64) error {
+
+	statement, erro := repoUser.db.Prepare(
+		"DELETE FROM users WHERE id = ?",
+	)
+
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(ID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// Search a user by email on the DB and return id and password
+func (repoUser Users) SearchByEmail(email string) (models.User, error) {
+
+	line, erro := repoUser.db.Query(
+		"SELECT id, password FROM users WHERE email = ?", email)
+
+	if erro != nil {
+		return models.User{}, erro
+	}
+	defer line.Close()
+
+	var user models.User
+
+	for line.Next() {
+		if erro = line.Scan(&user.ID, &user.Password); erro != nil {
+			return models.User{}, erro
+		}
+	}
+
+	return user, erro
+}

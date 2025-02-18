@@ -17,6 +17,7 @@ type Path struct {
 // Setup the paths on the routers
 func Setup(r *mux.Router) *mux.Router {
 	paths := pathUsers
+	paths = append(paths, routeLogin)
 
 	for _, path := range paths {
 		r.HandleFunc(path.URI, path.Function).Methods(path.Method)
