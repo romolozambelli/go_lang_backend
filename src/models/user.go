@@ -1,9 +1,13 @@
 package models
 
 import (
+	"backend/src/security"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
+
+	"github.com/badoux/checkmail"
 )
 
 type User struct {
@@ -17,14 +21,20 @@ type User struct {
 
 // Prepare the user with the validations and cleanning
 func (user *User) Prepare(step string) error {
+	fmt.Printf("model/users --> Preparing user ...\n")
+
 	if erro := user.validateUser(step); erro != nil {
 		return erro
 	}
-	user.format()
+	if erro := user.format(step); erro != nil {
+		return erro
+	}
 	return nil
 }
 
 func (user *User) validateUser(step string) error {
+
+	fmt.Printf("model/users --> Validating user ...\n")
 
 	if user.Name == "" {
 		return errors.New("name is mandatory to create a user")
@@ -38,7 +48,10 @@ func (user *User) validateUser(step string) error {
 
 	if user.Email == "" {
 		return errors.New("email is mandatory to create a user")
+	}
 
+	if erro := checkmail.ValidateFormat(user.Email); erro != nil {
+		return checkmail.ErrBadFormat
 	}
 
 	if step == "register" && user.Password == "" {
@@ -48,9 +61,20 @@ func (user *User) validateUser(step string) error {
 	return nil
 }
 
-func (user *User) format() {
+func (user *User) format(step string) error {
+
+	fmt.Printf("model/users --> Formating user ...\n")
+
 	user.Name = strings.TrimSpace(user.Name)
 	user.Nickname = strings.TrimSpace(user.Nickname)
 	user.Email = strings.TrimSpace(user.Email)
 
+	if step == "register" {
+		passwordWithHash, erro := security.Hash(user.Password)
+		if erro != nil {
+			return erro
+		}
+		user.Password = string(passwordWithHash)
+	}
+	return nil
 }
