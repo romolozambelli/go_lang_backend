@@ -15,6 +15,9 @@ var (
 
 	// Port of the MySql connection
 	PortDB = 0
+
+	// Secret Key to Sign the JWT Token
+	SecretKey []byte
 )
 
 // Initialize environment variables
@@ -39,5 +42,7 @@ func LoadVariables() {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 	)
+
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 
 }

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"backend/src/answer"
+	"backend/src/auth"
 	"backend/src/database"
 	"backend/src/models"
 	"backend/src/repo"
@@ -49,7 +50,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, _ := auth.GenerateToken(userDataDB.ID)
+
 	fmt.Printf("controler/login --> User fetch with success ...\n")
 
-	w.Write([]byte("Login Successfull"))
+	fmt.Println(token)
+
+	w.Write([]byte(token))
 }
