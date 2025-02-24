@@ -50,7 +50,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := auth.GenerateToken(userDataDB.ID)
+	token, erro := auth.GenerateToken(userDataDB.ID)
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
 
 	fmt.Printf("controler/login --> User fetch with success ...\n")
 

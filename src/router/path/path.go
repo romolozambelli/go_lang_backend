@@ -1,6 +1,7 @@
 package path
 
 import (
+	"backend/src/midleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,7 +21,12 @@ func Setup(r *mux.Router) *mux.Router {
 	paths = append(paths, routeLogin)
 
 	for _, path := range paths {
-		r.HandleFunc(path.URI, path.Function).Methods(path.Method)
+
+		if path.Auth {
+			r.HandleFunc(path.URI, midleware.Logger(midleware.Authenticate(path.Function))).Methods(path.Method)
+		} else {
+			r.HandleFunc(path.URI, midleware.Logger(path.Function)).Methods(path.Method)
+		}
 	}
 
 	return r
