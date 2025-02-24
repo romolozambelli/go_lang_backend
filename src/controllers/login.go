@@ -8,15 +8,12 @@ import (
 	"backend/src/repo"
 	"backend/src/security"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 )
 
 // Responsible for login the user
 func Login(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Printf("controler/login --> Starting the Login ...\n")
 
 	bodyRequest, erro := io.ReadAll(r.Body)
 
@@ -55,10 +52,5 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		answer.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
-
-	fmt.Printf("controler/login --> User fetch with success ...\n")
-
-	fmt.Println(token)
-
 	w.Write([]byte(token))
 }

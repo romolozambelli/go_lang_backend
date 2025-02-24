@@ -17,7 +17,7 @@ var pathUsers = []Path{
 		URI:      "/users",
 		Method:   http.MethodGet,
 		Function: controllers.GetUsers,
-		Auth:     false,
+		Auth:     true,
 	},
 
 	{

@@ -3,7 +3,6 @@ package models
 import (
 	"backend/src/security"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -21,8 +20,6 @@ type User struct {
 
 // Prepare the user with the validations and cleanning
 func (user *User) Prepare(step string) error {
-	fmt.Printf("model/users --> Preparing user ...\n")
-
 	if erro := user.validateUser(step); erro != nil {
 		return erro
 	}
@@ -33,9 +30,6 @@ func (user *User) Prepare(step string) error {
 }
 
 func (user *User) validateUser(step string) error {
-
-	fmt.Printf("model/users --> Validating user ...\n")
-
 	if user.Name == "" {
 		return errors.New("name is mandatory to create a user")
 
@@ -62,9 +56,6 @@ func (user *User) validateUser(step string) error {
 }
 
 func (user *User) format(step string) error {
-
-	fmt.Printf("model/users --> Formating user ...\n")
-
 	user.Name = strings.TrimSpace(user.Name)
 	user.Nickname = strings.TrimSpace(user.Nickname)
 	user.Email = strings.TrimSpace(user.Email)

@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"backend/src/answer"
+	"backend/src/auth"
 	"backend/src/database"
 	"backend/src/models"
 	"backend/src/repo"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -17,9 +18,6 @@ import (
 
 // Insert user on DB
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Printf("controllers/users --> Creating a new ...\n")
-
 	bodyRequest, erro := io.ReadAll(r.Body)
 
 	if erro != nil {
@@ -54,16 +52,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		answer.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
-
-	fmt.Printf("controllers/users --> User -> %d Created with success \n", user.ID)
 	answer.JSON(w, http.StatusCreated, user)
 }
 
 // Get all users from db
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Printf("controllers/users --> Get users by nick or name ...\n")
-
 	nameOrNick := strings.ToLower(r.URL.Query().Get("users"))
 
 	db, erro := database.Connect()
@@ -85,9 +78,6 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 // Get a user for a given id on db
 func GetUserById(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Printf("controllers/users --> Get users by a given id ...\n")
-
 	param := mux.Vars(r)
 
 	userID, erro := strconv.ParseUint(param["userID"], 10, 64)
@@ -121,14 +111,22 @@ func GetUserById(w http.ResponseWriter, r *http.Request) {
 
 // Update user by id
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Printf("controllers/users --> Updating an existent user\n")
-
 	param := mux.Vars(r)
 
 	userID, erro := strconv.ParseUint(param["userID"], 10, 64)
 	if erro != nil {
 		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	tokenUserID, erro := auth.GetUserIDFromToken(r)
+	if erro != nil {
+		answer.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if tokenUserID != userID {
+		answer.Erro(w, http.StatusForbidden, errors.New("not allowed to update other users"))
 		return
 	}
 
@@ -162,21 +160,28 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		answer.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
-
-	fmt.Printf("controllers/users --> User updated ID -> %d with success\n", userID)
 	answer.JSON(w, http.StatusNoContent, nil)
 
 }
 
 // Delete user from an id
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("controllers/users --> Deleting an existent user\n")
-
 	param := mux.Vars(r)
 
 	userID, erro := strconv.ParseUint(param["userID"], 10, 64)
 	if erro != nil {
 		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	tokenUserID, erro := auth.GetUserIDFromToken(r)
+	if erro != nil {
+		answer.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if tokenUserID != userID {
+		answer.Erro(w, http.StatusForbidden, errors.New("not allowed to delete other users"))
 		return
 	}
 
@@ -193,8 +198,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		answer.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
-
-	fmt.Printf("controllers/users --> Deleted user ID -> %d with success\n", userID)
 	answer.JSON(w, http.StatusNoContent, nil)
 
 }
