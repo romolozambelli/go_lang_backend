@@ -40,4 +40,39 @@ var pathUsers = []Path{
 		Function: controllers.DeleteUser,
 		Auth:     true,
 	},
+
+	{
+		URI:      "/users/{userID}/follow",
+		Method:   http.MethodPost,
+		Function: controllers.FollowUser,
+		Auth:     true,
+	},
+
+	{
+		URI:      "/users/{userID}/unfollow",
+		Method:   http.MethodPost,
+		Function: controllers.UnFollowUser,
+		Auth:     true,
+	},
+
+	{
+		URI:      "/users/{userID}/followers",
+		Method:   http.MethodGet,
+		Function: controllers.GetFollowers,
+		Auth:     true,
+	},
+
+	{
+		URI:      "/users/{userID}/following",
+		Method:   http.MethodGet,
+		Function: controllers.GetFollowingUsers,
+		Auth:     true,
+	},
+
+	{
+		URI:      "/users/{userID}/change-password",
+		Method:   http.MethodPost,
+		Function: controllers.UpdatePassword,
+		Auth:     true,
+	},
 }
