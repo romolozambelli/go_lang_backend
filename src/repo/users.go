@@ -38,8 +38,6 @@ func (repoUser Users) CreateNewUser(user models.User) (uint64, error) {
 		return 0, nil
 	}
 
-	fmt.Printf("User inserted with success on repo = %d/n", lastInsertedID)
-
 	return uint64(lastInsertedID), nil
 }
 
@@ -164,4 +162,138 @@ func (repoUser Users) SearchByEmail(email string) (models.User, error) {
 	}
 
 	return user, erro
+}
+
+func (repoUser Users) Follow(userID, followID uint64) error {
+	statement, erro := repoUser.db.Prepare(
+		"INSERT IGNORE INTO followers (user_id, follower_id) VALUES (?,?)",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(userID, followID); erro != nil {
+		return erro
+	}
+	return nil
+}
+
+func (repoUser Users) UnFollow(userID, followID uint64) error {
+
+	statement, erro := repoUser.db.Prepare(
+		"DELETE FROM followers WHERE user_id = ? AND follower_id = ?",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(userID, followID); erro != nil {
+		return erro
+	}
+	return nil
+}
+
+// Get all the followers from a giver user
+func (repoUser Users) GetFollowers(userID uint64) ([]models.User, error) {
+
+	lines, erro := repoUser.db.Query(
+		`SELECT u.id, u.name, u.nickname, u.email,u.created
+		FROM users u INNER JOIN followers s on u.id = s.follower_id 
+		WHERE s.user_id = ?`, userID)
+
+	if erro != nil {
+		return nil, erro
+	}
+	defer lines.Close()
+
+	var users []models.User
+
+	for lines.Next() {
+		var user models.User
+		if erro = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nickname,
+			&user.Email,
+			&user.CreateDate,
+		); erro != nil {
+			return nil, erro
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+// Get all the users is follow by the given users
+func (repoUser Users) GetFollowingUsers(userID uint64) ([]models.User, error) {
+
+	lines, erro := repoUser.db.Query(
+		`SELECT u.id, u.name, u.nickname, u.email,u.created
+		FROM users u INNER JOIN followers s on u.id = s.user_id 
+		WHERE s.follower_id = ?`, userID)
+
+	if erro != nil {
+		return nil, erro
+	}
+	defer lines.Close()
+
+	var users []models.User
+	for lines.Next() {
+		var user models.User
+		if erro = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nickname,
+			&user.Email,
+			&user.CreateDate,
+		); erro != nil {
+			return nil, erro
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+// Get the user password
+func (repoUser Users) GetPassword(userID uint64) (string, error) {
+
+	line, erro := repoUser.db.Query(
+		"SELECT password FROM users WHERE id = ?", userID)
+
+	if erro != nil {
+		return "", erro
+	}
+	defer line.Close()
+
+	var user models.User
+
+	if line.Next() {
+		if erro = line.Scan(&user.Password); erro != nil {
+			return "", erro
+		}
+	}
+
+	return user.Password, nil
+
+}
+
+func (repoUser Users) UpdatePassword(userID uint64, password string) error {
+
+	statement, erro := repoUser.db.Prepare(
+		"UPDATE users SET password = ? WHERE id = ?",
+	)
+
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro := statement.Exec(password, userID); erro != nil {
+		return erro
+	}
+
+	return nil
+
 }
