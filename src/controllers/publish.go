@@ -1,9 +1,62 @@
 package controllers
 
-import "net/http"
+import (
+	"backend/src/answer"
+	"backend/src/auth"
+	"backend/src/database"
+	"backend/src/models"
+	"backend/src/repo"
+	"encoding/json"
+	"io"
+	"net/http"
+)
 
 // Create a new post
 func CreatePost(w http.ResponseWriter, r *http.Request) {
+	userID, erro := auth.GetUserIDFromToken(r)
+	if erro != nil {
+		answer.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	bodyRequest, erro := io.ReadAll(r.Body)
+	if erro != nil {
+		answer.Erro(w, http.StatusUnprocessableEntity, erro)
+		return
+	}
+
+	var post models.Post
+
+	if erro = json.Unmarshal(bodyRequest, &post); erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	post.AuthorID = userID
+
+	if erro := post.Prepare(); erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoPosts(db)
+
+	post.ID, erro = repo.CreatePost(post)
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+
+	}
+
+	answer.JSON(w, http.StatusCreated, post)
 
 }
 

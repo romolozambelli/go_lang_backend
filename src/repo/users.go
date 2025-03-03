@@ -19,7 +19,7 @@ func NewRepoUsers(db *sql.DB) *Users {
 // Create a new user based on the user model
 func (repoUser Users) CreateNewUser(user models.User) (uint64, error) {
 	statement, erro := repoUser.db.Prepare(
-		"INSERT INTO users (name,nickname,email,password) values (?,?,?,?)",
+		"INSERT INTO users (name,nickname,email,password) VALUES (?,?,?,?)",
 	)
 
 	if erro != nil {
