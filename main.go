@@ -37,7 +37,7 @@ func main() {
 
 	r := router.Generate()
 
-	fmt.Printf("DB Connected to Port : %d \n", config.PortDB)
+	fmt.Printf("Application Started. Listenning HTTP requests\n")
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.PortDB), r))
 }

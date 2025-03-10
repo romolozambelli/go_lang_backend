@@ -108,3 +108,104 @@ func (repoPost Posts) GetPosts(userID uint64) ([]models.Post, error) {
 	}
 	return posts, nil
 }
+
+// Update a post on the database
+func (repoPost Posts) UpdatePost(postID uint64, post models.Post) error {
+
+	statement, erro := repoPost.db.Prepare("UPDATE posts SET title = ?, text = ? WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(post.Title, post.Text, postID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// Delete a Post from the user
+func (repoPost Posts) DeletePostByID(postID uint64) error {
+
+	statement, erro := repoPost.db.Prepare("DELETE FROM posts WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(postID); erro != nil {
+		return erro
+	}
+	return nil
+}
+
+// Get all the posts from a given user
+func (repoPost Posts) GetPostsByID(userID uint64) ([]models.Post, error) {
+
+	lines, erro := repoPost.db.Query(`
+	SELECT p.*, u.nickname FROM posts p 
+	JOIN users u ON u.id = p.autor_id 
+	WHERE p.autor_id = ?`, userID)
+
+	if erro != nil {
+		return nil, erro
+	}
+
+	defer lines.Close()
+
+	var posts []models.Post
+
+	for lines.Next() {
+
+		var post models.Post
+
+		if erro = lines.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Text,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreateDate,
+			&post.AuthorNick,
+		); erro != nil {
+			return nil, erro
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
+// Like a post from a user
+func (repoPost Posts) LikePost(postID uint64) error {
+	statement, erro := repoPost.db.Prepare("UPDATE posts SET likes = likes + 1 WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(postID); erro != nil {
+		return erro
+	}
+	return nil
+}
+
+// Unlike a post from a user
+func (repoPost Posts) UnlikePost(postID uint64) error {
+	statement, erro := repoPost.db.Prepare(`
+	UPDATE posts SET likes = 
+	CASE WHEN likes > 0 THAN
+	likes - 1 ELSE likes
+	END
+	WHERE id = ?
+	`)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(postID); erro != nil {
+		return erro
+	}
+	return nil
+}
