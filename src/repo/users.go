@@ -3,7 +3,6 @@ package repo
 import (
 	"backend/src/models"
 	"database/sql"
-	"fmt"
 )
 
 // Struct of the USER Repo
@@ -42,7 +41,6 @@ func (repoUser Users) CreateNewUser(user models.User) (uint64, error) {
 }
 
 func (repoUser Users) GetUserOrNick(nameOrNick string) ([]models.User, error) {
-	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick) //%nameOrNick%
 
 	lines, erro := repoUser.db.Query(
 		"SELECT id, name, nickname, email, created FROM users WHERE name LIKE ? OR nickname LIKE ?",

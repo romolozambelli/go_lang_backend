@@ -8,31 +8,36 @@ import (
 	"net/http"
 )
 
-// Init function used only to create the secret key
-// func init() {
-// 	key := make([]byte, 64)
-
-// 	if _, erro := rand.Read(key); erro != nil {
-// 		log.Fatal(erro)
-// 	}
-
-// 	stringBase64 := base64.StdEncoding.EncodeToString((key))
-
-// 	fmt.Println(stringBase64)
-
-// }
+// const defaultMessage = "Hello Default Message!"
+// const newWelcomeMessage = "Hello, welcome to this OpenFeature-enabled website!"
 
 func main() {
-	fmt.Printf("Social Backend Starting\n")
 
 	config.LoadVariables()
 
-	fmt.Printf("Environment Variables Loaded with Success\n")
+	// err := openfeature.SetProviderAndWait(flagd.NewProvider())
+	// if err != nil {
+	// 	// If a provider initialization error occurs, log it and exit
+	// 	log.Fatalf("Failed to set the OpenFeature provider: %v", err)
+	// }
+
+	// Initialize OpenFeature client
+	//client := openfeature.NewClient("GoStartApp")
+
+	// Evaluate welcome-message feature flag
+	// welcomeMessage, _ := client.BooleanValue(
+	// 	context.Background(), "welcome-message", false, openfeature.EvaluationContext{},
+	// )
+
+	// if welcomeMessage {
+	// 	fmt.Println(newWelcomeMessage)
+	// } else {
+	// 	fmt.Println(defaultMessage)
+	// }
 
 	r := router.Generate()
 
 	fmt.Printf("DB Connected to Port : %d \n", config.PortDB)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.PortDB), r))
-
 }

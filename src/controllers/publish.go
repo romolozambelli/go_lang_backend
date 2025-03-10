@@ -9,6 +9,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // Create a new post
@@ -63,10 +66,56 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 // Get a list of post
 func GetPost(w http.ResponseWriter, r *http.Request) {
 
+	userID, erro := auth.GetUserIDFromToken(r)
+	if erro != nil {
+		answer.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoPosts(db)
+	posts, erro := repo.GetPosts(userID)
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+
+	}
+
+	answer.JSON(w, http.StatusOK, posts)
+
 }
 
 // Get a single post
 func GetPostByID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postID, erro := strconv.ParseUint(params["postid"], 10, 64)
+	if erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoPosts(db)
+	post, erro := repo.GetPost(postID)
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+
+	}
+
+	answer.JSON(w, http.StatusOK, post)
 
 }
 
