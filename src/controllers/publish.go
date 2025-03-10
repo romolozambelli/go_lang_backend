@@ -226,3 +226,84 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 
 	answer.JSON(w, http.StatusOK, nil)
 }
+
+// Get all the posts from a user
+func GetUsersPost(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+
+	userID, erro := strconv.ParseUint(params["userid"], 10, 64)
+	if erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoPosts(db)
+	posts, erro := repo.GetPostsByID(userID)
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	answer.JSON(w, http.StatusOK, posts)
+
+}
+
+// like a post from a user
+func LikePost(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	postID, erro := strconv.ParseUint(params["postid"], 10, 64)
+	if erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoPosts(db)
+
+	if erro = repo.LikePost(postID); erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	answer.JSON(w, http.StatusNoContent, nil)
+}
+
+// Unlike a post from a user
+func UnlikePost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postID, erro := strconv.ParseUint(params["postid"], 10, 64)
+	if erro != nil {
+		answer.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repo := repo.NewRepoPosts(db)
+
+	if erro = repo.UnlikePost(postID); erro != nil {
+		answer.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	answer.JSON(w, http.StatusNoContent, nil)
+
+}
