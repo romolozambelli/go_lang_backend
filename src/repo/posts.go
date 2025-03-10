@@ -108,3 +108,34 @@ func (repoPost Posts) GetPosts(userID uint64) ([]models.Post, error) {
 	}
 	return posts, nil
 }
+
+// Update a post on the database
+func (repoPost Posts) UpdatePost(postID uint64, post models.Post) error {
+
+	statement, erro := repoPost.db.Prepare("UPDATE posts SET title = ?, text = ? WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(post.Title, post.Text, postID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// Delete a Post from the user
+func (repoPost Posts) DeletePostByID(postID uint64) error {
+
+	statement, erro := repoPost.db.Prepare("DELETE FROM posts WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(postID); erro != nil {
+		return erro
+	}
+	return nil
+}
