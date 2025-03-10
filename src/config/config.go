@@ -23,8 +23,6 @@ var (
 // Initialize environment variables
 func LoadVariables() {
 
-	fmt.Println("Loading environment variables ...")
-
 	var erro error
 
 	if erro = godotenv.Load(); erro != nil {

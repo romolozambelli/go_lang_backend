@@ -19,6 +19,7 @@ type Path struct {
 func Setup(r *mux.Router) *mux.Router {
 	paths := pathUsers
 	paths = append(paths, routeLogin)
+	paths = append(paths, pathPost...)
 
 	for _, path := range paths {
 
